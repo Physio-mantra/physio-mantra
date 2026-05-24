@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Dashboard | Physio मंत्र</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #FAF7F2;
+        }
+        
+        .admin-header {
+            background: #0B1C3A;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .admin-header h1 span {
+            color: #C8622A;
+        }
+        
+        .logout-btn {
+            background: #C8622A;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 14px;
+            border: 1px solid #E8E0D5;
+        }
+        
+        .stat-card h3 {
+            color: #6B6B6B;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #C8622A;
+        }
+        
+        .requests-table {
+            width: 100%;
+            background: white;
+            border-radius: 14px;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+        
+        .requests-table th,
+        .requests-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #E8E0D5;
+        }
+        
+        .requests-table th {
+            background: #FAF7F2;
+            font-weight: 600;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-new { background: #eff6ff; color: #3b82f6; }
+        .badge-called { background: #fef3c7; color: #d97706; }
+        .badge-confirmed { background: #d1fae5; color: #059669; }
+        .badge-dispatched { background: #ede9fe; color: #7c3aed; }
+        .badge-completed { background: #dcfce7; color: #16a34a; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6B6B6B;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <h1>Physio <span>मंत्र</span> - Admin Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+    
+    <div class="container">
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card"><h3>Total Requests</h3><div class="stat-number" id="totalCount">0</div></div>
+            <div class="stat-card"><h3>New</h3><div class="stat-number" id="newCount">0</div></div>
+            <div class="stat-card"><h3>In Progress</h3><div class="stat-number" id="progressCount">0</div></div>
+            <div class="stat-card"><h3>Completed</h3><div class="stat-number" id="completedCount">0</div></div>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">All Requests</h3>
+        <div id="requestsTable"></div>
+    </div>
+
+    <script>
+        // Check authentication
+        const isLoggedIn = localStorage.getItem('pm_admin_auth');
+        if (isLoggedIn !== 'true') {
+            window.location.href = 'login.html';
+        }
+        
+        // Sample data for testing (replace with Supabase later)
+        let sampleRequests = [
+            {
+                id: 1,
+                name: "Test User",
+                phone: "9876543210",
+                service: "Sports Physiotherapy",
+                visit_type: "Home Visit",
+                status: "new",
+                created_at: new Date().toISOString(),
+                preferred_date: "2024-12-25",
+                preferred_time: "10:00",
+                address: "Test Address, Mumbai",
+                notes: "Test notes"
+            }
+        ];
+        
+        function getStatusBadge(status) {
+            const badges = {
+                'new': 'badge-new',
+                'called': 'badge-called',
+                'confirmed': 'badge-confirmed',
+                'dispatched': 'badge-dispatched',
+                'completed': 'badge-completed'
+            };
+            return `<span class="badge ${badges[status] || 'badge-new'}">${status.toUpperCase()}</span>`;
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN') + ' ' + date.toLocaleTimeString('en-IN', {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        function updateStats() {
+            const total = sampleRequests.length;
+            const newCount = sampleRequests.filter(r => r.status === 'new').length;
+            const progressCount = sampleRequests.filter(r => ['called', 'confirmed', 'dispatched'].includes(r.status)).length;
+            const completedCount = sampleRequests.filter(r => r.status === 'completed').length;
+            
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('newCount').textContent = newCount;
+            document.getElementById('progressCount').textContent = progressCount;
+            document.getElementById('completedCount').textContent = completedCount;
+        }
+        
+        function renderRequests() {
+            if (sampleRequests.length === 0) {
+                document.getElementById('requestsTable').innerHTML = '<div class="empty-state">No requests yet. When patients book appointments, they will appear here.</div>';
+                return;
+            }
+            
+            let html = `<table class="requests-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Service</th>
+                        <th>Visit Type</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            
+            sampleRequests.forEach(req => {
+                html += `<tr>
+                    <td>${req.name}</td>
+                    <td>${req.phone}</td>
+                    <td>${req.service}</td>
+                    <td>${req.visit_type}</td>
+                    <td>${getStatusBadge(req.status)}</td>
+                    <td>${req.preferred_date} ${req.preferred_time}</td>
+                    <td>${formatDate(req.created_at)}</td>
+                </tr>`;
+            });
+            
+            html += `</tbody></table>`;
+            document.getElementById('requestsTable').innerHTML = html;
+        }
+        
+        function logout() {
+            localStorage.removeItem('pm_admin_auth');
+            window.location.href = 'login.html';
+        }
+        
+        // Load everything
+        updateStats();
+        renderRequests();
+        
+        // Optional: Try to fetch real data from Supabase (if configured)
+        // Uncomment and add your Supabase URL and key to enable real data
+        /*
+        async function fetchRealRequests() {
+            const SUPABASE_URL = 'https://your-project.supabase.co';
+            const SUPABASE_ANON_KEY = 'your-anon-key';
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/requests?order=created_at.desc`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+                if (response.ok) {
+                    sampleRequests = await response.json();
+                    updateStats();
+                    renderRequests();
+                }
+            } catch (error) {
+                console.log('Using sample data - Supabase not configured yet');
+            }
+        }
+        fetchRealRequests();
+        */
+    </script>
+</body>
+</html>
