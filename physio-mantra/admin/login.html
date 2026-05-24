@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Login | Physio मंत्र</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0B1C3A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 14px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            margin: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #0B1C3A;
+        }
+        
+        .login-card .subtitle {
+            text-align: center;
+            color: #6B6B6B;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #0B1C3A;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #E8E0D5;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #C8622A;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            background: #C8622A;
+            color: white;
+            border: none;
+            padding: 0.875rem;
+            border-radius: 9999px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            background: #b85622;
+        }
+        
+        .form-error {
+            color: #dc2626;
+            font-size: 0.75rem;
+            display: block;
+            margin-top: 0.25rem;
+        }
+        
+        .logo {
+            text-align: center;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0B1C3A;
+        }
+        
+        .logo span {
+            color: #C8622A;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">Physio <span>मंत्र</span></div>
+        <h2>Admin Portal</h2>
+        <p class="subtitle">Enter your password to continue</p>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required autocomplete="off">
+                <span class="form-error" id="loginError"></span>
+            </div>
+            <button type="submit" class="btn-primary">Login</button>
+        </form>
+    </div>
+
+    <script>
+        // Admin password - change this to whatever you want
+        const ADMIN_PASSWORD = 'Silver@300';
+        
+        // Check if already logged in
+        const isLoggedIn = localStorage.getItem('pm_admin_auth');
+        if (isLoggedIn === 'true') {
+            window.location.href = 'dashboard.html';
+        }
+        
+        // Handle login form
+        const form = document.getElementById('loginForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const password = document.getElementById('password').value;
+                const errorSpan = document.getElementById('loginError');
+                
+                if (password === ADMIN_PASSWORD) {
+                    localStorage.setItem('pm_admin_auth', 'true');
+                    window.location.href = 'dashboard.html';
+                } else {
+                    errorSpan.textContent = 'Incorrect password. Please try again.';
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
