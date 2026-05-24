@@ -1,6 +1,6 @@
 /* js/admin.js */
 // REPLACE THESE WITH YOUR ACTUAL SUPABASE CREDENTIALS
-const SUPABASE_URL = 'https://rfbkfoabjwxfjldefcor.supabase.co/rest/v1/';
+const SUPABASE_URL = 'https://rfbkfoabjwxfjldefcor.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmYmtmb2Fiand4ZmpsZGVmY29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MTQ5OTUsImV4cCI6MjA5NTE5MDk5NX0.Gqj0hOdf5Oe83nBYPTGEb5Hnv2IYeRkSaufIW6fW69Y';
 const ADMIN_PASSWORD = 'Silver@300';
 
